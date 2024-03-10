@@ -6,6 +6,7 @@ output:
     allow_skip: true
     allow_retry: true
     allow_reset: true
+    language: fr
 runtime: shiny_prerendered
 ---
 
@@ -26,6 +27,9 @@ library(smacpod)
 library(ggspatial)
 library(geodata)
 library(kableExtra)
+library(gradethis)
+
+gradethis_setup()
 
 covid = lima_covid
 
@@ -33,16 +37,16 @@ covid_p <- covid |>
   st_as_sf(coords = c("lon", "lat"), crs = 4326)
 
 covid_count <- covid %>%
-  group_by(DISTRITO, FECHA_RESULTADO) %>%
-  summarise(casos = n()) %>%
+  group_by(DISTRICT, DATE_RESULTAT) %>%
+  summarise(nb_cas = n()) %>%
   ungroup() %>%
-  complete(FECHA_RESULTADO = seq.Date(min(FECHA_RESULTADO, na.rm =T),
-                                      max(FECHA_RESULTADO, na.rm = T),
-                                      by="day"),nesting(DISTRITO), fill = list(n = 0))
+  complete(DATE_RESULTAT = seq.Date(min(DATE_RESULTAT, na.rm =T),
+                                      max(DATE_RESULTAT, na.rm = T),
+                                      by="day"),nesting(DISTRICT), fill = list(nb_cas = 0))
 
 covid_sf <- lima_sf %>%
-  mutate(DISTRITO = toupper(NAME_3)) %>%
-  full_join(covid_count, by = "DISTRITO", "FECHA_RESULTADO")
+  mutate(DISTRICT = toupper(NAME_3)) %>%
+  full_join(covid_count, by = "DISTRICT", "DATE_RESULTAT")
 
 ```
 
@@ -284,11 +288,11 @@ Pour cet exercice, nous utiliserons une base de données fictive qui a
 péruvien](https://www.datosabiertos.gob.pe/group/datos-abiertos-de-covid-19)
 comme référence. Cette base de données contient les dossiers de chaque
 personne diagnostiquée avec le COVID-19 par le ministère de la Santé
-(MINSA) jusqu'au « 24 MAI-2020 ».
+(MINSA) jusqu'au 31 décembre 2020.
 
 Les données de géoréférencement (coordonnées) des cas ont été simulées
 pour les besoins de cet atelier. Vous pouvez télécharger directement
-la base de données depuis le référentiel [Zenodo](https://zenodo.org/record/4915889#.YMBxoTZKhjw)
+la base de données depuis le référentiel [Zenodo](https://zenodo.org/record/4915889#.YMBxoTZKhjw).
 Nous les avons chargées avec la fonction `read_csv()`.
 
 ```
@@ -296,7 +300,7 @@ covid <- read_csv(url("https://zenodo.org/record/4915889/files/covid19data.csv?d
 
 ```
 
-> Essayez de les présenter sous forme de tableau avec la fonction `kbl()`:
+> Essayez présenter les 5 premières lignes sous forme de tableau avec les fonctions `head()` et `kbl()`:
 
 ```{r table_covid, exercise = TRUE}
 
@@ -304,60 +308,83 @@ covid <- read_csv(url("https://zenodo.org/record/4915889/files/covid19data.csv?d
 ```
 
 ```{r table_covid-solution}
-kbl(head(covid, 10)) |> 
+covid |> 
+  head(5) |>
+  kbl() |>
   kable_styling()
 ```
+
+```{r table_covid-check}
+grade_code()
+```
+
 ## Gestion des données spatiales
 
-`R` dispose d'un vaste univers de packages pour la représentation et l'analyse spatiales. 
+`R` dispose d'un vaste univers de packages pour la représentation et l'analyse spatiale. 
 Actuellement, il existe 2 formats prédominants:
 [`sp`](https://cran.r-project.org/web/packages/sp/vignettes/intro_sp.pdf)
 et [`sf`](https://r-%20spatial.github.io/sf/). Pour les besoins de cet
-atelier, nous utiliserons «sf» car il a une intégration naturelle avec
-l'écosystème «tidyverse».
+atelier, nous utiliserons `sf` car il a une intégration naturelle avec
+l'écosystème `tidyverse`.
 
 Il existe plusieurs variétés de représentations graphiques avec des
-données spatiales. Dans ce cours, nous nous concentrerons sur la
-représentation spatiale de 1) modèles de points et 2) de données
+données spatiales. Dans cette étude de cas, nous nous concentrerons sur la
+représentation spatiale de 1) modèles de points et de 2) données
 polygonales (*par exemple par zones administratives*).
 
 ### Motifs de points
 
 Si nous disposons d'une base de données géoréférencée (avec des
 coordonnées géographiques pour chaque observation) nous pouvons utiliser
-ces valeurs ( *coordonnées* ) pour transformer notre base de données
+ces valeurs (*coordonnées*) pour transformer notre base de données
 tabulaire en base de données spatiale.
 
 Nous utiliserons la fonction `st_as_sf()` pour spécifier les valeurs
 de latitude et de longitude. De plus, nous devons préciser le *système
 de référence de coordonnées (CRS)* avec lequel nos données dans la
-zone d'étude ont été géoréférencées ( *ex. crs = 4326* ).
-> Créez la variable covid_p en utilisant la fonction `st_as_sf()`.
+zone d'étude ont été géoréférencées (*ex. crs = 4326*).
+
+> Complétez le code suivant pour créer la variable covid_p en utilisant la fonction `st_as_sf()`.
 
 ```{r covid_p, exercise = TRUE, exercise.blanks = "___+"}
 covid_p <- covid |>
   st_as_sf(coords = c("____", "____"), crs = ____)
 ```
 
+```{r covid_p-hint-1}
+#Avez-vous pensé à regarder l'aide de la fonction `st_as_sf()`?
+```
+
+```{r covid_p-hint-2}
+#Souvenez-vous du nom des colonnes des coordonnées géographiques...
+```
+
 ```{r covid_p-solution}
 covid_p <- covid |>
   st_as_sf(coords = c("lon", "lat"), crs = 4326)
+```
 
-#on vérifie 
-class(covid_p)
+```{r covid_p-check}
+grade_code()
 ```
 
 ###
-> Nous allons créer un tracé simple en utilisant la géométrie `ggplot2` et
->`geom_sf()` en ne gardant (`filter()`) que les cas du 11 décembre 2020 (variable `FECHA_RESULTADO`)  .
+> Vous allez maintenant créer un tracé simple en utilisant `ggplot` et
+>`geom_sf()` en ne gardant  que les cas du 11 décembre 2020. Complétez le code suivant:
 
-```{r covid_p_plot, exercise = TRUE}
+```{r covid_p_plot, exercise = TRUE, exercise.blanks = "___+"}
+covid_p |> 
+  filter(____) |>
+  ____
+```
 
+```{r covid_p_plot-hint-1}
+`filter()` sur la variable `DATE_RESULTAT`
 ```
 
 ```{r covid_p_plot-solution}
 covid_p |>
-  filter(FECHA_RESULTADO == "2020-12-11") |>
+  filter(DATE_RESULTAT == "2020-12-11") |>
   ggplot() +
   geom_sf() 
 ```
@@ -369,8 +396,8 @@ sélectionner des points sur la carte.
 
 ```{r mapview, exercise = TRUE}
 m_p <- covid_p |> 
-  filter(FECHA_RESULTADO == "2020-12-11") |>
-  mapview(layer.name = "puntos")
+  filter(DATE_RESULTAT == "2020-12-11") |>
+  mapview(layer.name = "PATIENTS")
 
 m_p
 ```
@@ -403,29 +430,84 @@ lima_sf <- peru %>%
 
 ###
 
-Nous allons maintenant traiter les données de base `covid` et les
+Nous allons maintenant traiter les données de la base `covid` et les
 données spatiales `lima_sf` afin de réaliser la jointure.
 
-> Notre base de données étant au niveau individuel, nous compterons le
-> nombre d'observations pour chaque date et quartier. Nous construirons
-> des données de type « panel », pour lesquelles nous compléterons par «
-> 0 » toutes les dates des unités géographiques n'ayant pas déclaré de
-> cas.
+Notre base de données étant au niveau individuel, nous compterons le
+nombre d'observations pour chaque date et chaque district. Nous construirons
+des données de type « panel », pour lesquelles nous compléterons par « 0 » 
+toutes les dates des unités géographiques n'ayant pas déclaré de cas.
 
-```{r covid_sf, exercise = T, message = FALSE, warning = FALSE}
-covid_count <- covid %>%
-  group_by(DISTRITO, FECHA_RESULTADO) %>%
-  summarise(casos = n()) %>%
-  ungroup() %>%
-  complete(FECHA_RESULTADO = seq.Date(min(FECHA_RESULTADO, na.rm =T),
-                                      max(FECHA_RESULTADO, na.rm = T),
-                                      by="day"),nesting(DISTRITO), fill = list(n = 0))
+> Etudiez le code suivant pour comprendre comment nous avons réalisé ce comptage.
 
-covid_sf <- lima_sf %>%
-  mutate(DISTRITO = toupper(NAME_3)) %>%
-  full_join(covid_count, by = "DISTRITO", "FECHA_RESULTADO")
+```{r covid_count, exercise = T, message = FALSE, warning = FALSE}
+covid_count <- covid |>
+  group_by(DISTRICT, DATE_RESULTAT) |>
+  summarise(nb_cas = n()) |>
+  ungroup() |>
+  complete(DATE_RESULTAT = seq.Date(min(DATE_RESULTAT, na.rm =T),
+                                    max(DATE_RESULTAT, na.rm = T),
+                                    by="day"),
+           nesting(DISTRICT), 
+           fill = list(nb_cas = 0))
+```
 
-class(covid_sf)
+### 
+> En utilisant la variable `covid_count`, représentez la série temporelle du 
+> nombre de cas du district de COMAS en utilisant `ggplot` et `geom_col()`. 
+
+```{r covid_count_plot, exercise = TRUE}
+
+```
+
+```{r covid_count_plot-hint-1}
+`geom_col()` nécessite des variables pour les axes x et y.
+```
+
+```{r covid_count_plot-hint-2}
+covid_count |>
+  filter(DISTRICT == ____) |>
+  ggplot() +
+  geom_col(aes(x = ____, y = ____))
+```
+
+```{r covid_count_plot-solution}
+covid_count |>
+  filter(DISTRICT == "COMAS") |>
+  ggplot() +
+  geom_col(aes(x = DATE_RESULTAT, y = nb_cas))
+```
+
+```{r covid_count_plot-check}
+grade_code()
+```
+
+###
+
+> Complétez le code suivant pour réaliser la jointure entre `lima_sf` et `covid_count` en utilisant la fonction `full_join()`.
+
+```{r covid_sf, exercise = TRUE, exercise.blanks = "___+", eval = F}
+
+covid_sf <- lima_sf |>
+  mutate(DISTRICT = toupper(NAME_3)) |>
+  ____(____, by = "____", "____")
+
+covid_sf
+
+```
+
+```{r covid_sf-solution}
+
+covid_sf <- lima_sf |>
+  mutate(DISTRICT = toupper(NAME_3)) |>
+  full_join(covid_count, by = "DISTRICT", "DATE_RESULTAT")
+
+covid_sf
+
+```
+
+```{r covid_sf-check}
+grade_code()
 ```
 
 ### 
@@ -435,19 +517,35 @@ sont projetées au bon endroit.
 
 ```{r plot_covid_sf, exercise = T, warning=F, message=F}
 covid_sf %>%
-    filter(FECHA_RESULTADO == "2020-12-11") %>%
+    filter(DATE_RESULTAT == "2020-12-11") %>%
   ggplot() +
   geom_sf()
 ```
 
-```{r mv_covid_sf, exercise = T, eval=F}
-m_sf <- covid_sf %>% 
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
-  mapview(layer.name = "distritos")
+> Faites la même chose en utilisant la fonction `mapview()` pour avoir une carte interactive.
+> mais en mettant le résultat dans une variable `m_sf` que vous évaluerez pour afficher la carte.
 
-m_sf
+```{r mv_plot_covid_sf, exercise = TRUE}
+
 ```
 
+```{r mv_plot_covid_sf-hint-1}
+La fonction `mapview()` prend en argument un objet de type `sf`.
+```
+
+```{r mv_plot_covid_sf-solution}
+m_sf = covid_sf %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(layer.name = "DISTRICTS")
+
+m_sf
+
+```
+
+```{r mv_plot_covid_sf-check}
+grade_code()
+
+```
 
 ### Plusieurs couches de représentation
 
@@ -455,21 +553,44 @@ Le contenu des cartes est généralement représenté sous forme de couches,
 que nous pouvons combiner et superposer pour comprendre l'événement qui
 nous intéresse.
 
-> Chaque couche est ajoutée sous une géométrie différente avec
-> `geom_sf()`. Dans MapView, nous pouvons utiliser le symbole «+» pour
-> tracer les deux couches.
+Chaque couche est ajoutée sous une géométrie différente avec `geom_sf()`, comme
+dans le code ci-dessous:  
 
-```{r twolayers, exercise = T, warning=F, message=F}
+```{r twolayers, exercise = TRUE, warning=F, message=F}
 ggplot() +
   geom_sf(data = covid_sf %>% 
-            filter(FECHA_RESULTADO == "2020-12-11")) + 
+            filter(DATE_RESULTAT == "2020-12-11")) + 
   geom_sf(data = covid_p %>% 
-            filter(FECHA_RESULTADO == "2020-12-11"))
+            filter(DATE_RESULTAT == "2020-12-11"))
 ```
 
-```{r eval=F}
+Dans `mapview`, nous pouvons utiliser le symbole "+" pour tracer les deux couches
+après les avoir construites séparemment.
+
+> Utilisez la fonction `mapview()` pour visualiser les deux couches de données spatiales
+> `covid_sf` et `covid_p` pour la date "2020-12-11".
+
+```{r mv_twolayers, exercise = TRUE, exercise.eval=F}
+
+```
+
+```{r mv_twolayers-hint-1}
+#Une des couches a déjà été construite dans une question précédente.
+```
+
+
+```{r mv_twolayers-solution, eval=F, include = F}
+m_p = covid_p %>% 
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(layer.name = "PATIENTS")
+
+m_sf = covid_sf %>% 
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(layer.name = "DISTRICTS")
+
 m_p + m_sf
 ```
+
 
 
 ## Visualisation des données spatiales
@@ -485,27 +606,41 @@ des attributs que nous souhaitons représenter graphiquement.
 
 **Une variable**
 
-> Nous utiliserons la couleur de la géométrie (argument `col`) pour
+> Utilisez la couleur de la géométrie (argument `col`) pour
 > représenter le sexe des patients COVID-19 dans la base de données.
 
-```{r sex_layer, exercise = T, warning=F, message=F}
+```{r sex_layer, exercise = TRUE, exercise.blanks = "___+"}
 covid_p %>%
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
   ggplot() +
-  geom_sf(aes(col = SEXO), alpha = .2) +
-  facet_wrap(.~SEXO)
+  ____(aes(col = ____), alpha = .2) +
+  facet_wrap(.~____)
+```
+
+```{r sex_layer-solution}
+covid_p %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  ggplot() +
+  geom_sf(aes(col = SEXE), alpha = .2) +
+  facet_wrap(.~SEXE)
+```
+
+```{r sex_layer-check}
+grade_code()
 ```
 
 Dans le cas d'une visualisation dynamique avec `mapview`, la couleur est
 attribuée avec l'argument `zcol`. Nous utiliserons l'argument
-`burst = T` pour que chaque catégorie (de la variable affectée dans
-`zcol`) soit affichée comme une couche séparée et puisse être
+`burst = T` pour que chaque catégorie de la variable affectée dans
+`zcol` soit affichée comme une couche séparée et puisse être
 sélectionnée ou masquée sur la carte.
 
-```{r sex_mv, exercise = T, eval=F}
+> Exécutez le code suivant:
+
+```{r sex_mv, exercise = TRUE, eval=F}
 covid_p %>% 
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
-  mapview(layer.name = "points", zcol = "SEXO", burst = T)
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(layer.name = "points", zcol = "SEXE", burst = T)
 ```
 
 
@@ -515,32 +650,62 @@ Comme pour les graphiques de données tabulaires, nous pouvons explorer
 des visualisations à facettes et diviser les données en sous-groupes
 ciblés.
 
-```{r sex_date, exercise = T, warning=F, message=F}
+> Complétez le code suivant pour comparer les données du 11 avril 2020 
+> et du 11 décembre 2020 par sexe : 
+
+```{r sex_date, exercise = TRUE, exercise.blanks = "___+", warning=F, message=F}
 covid_p %>%
-  filter(FECHA_RESULTADO == "2020-04-11" |
-           FECHA_RESULTADO == "2020-12-11") %>%
+  filter(DATE_RESULTAT == "____" |
+           DATE_RESULTAT == "____") %>%
   ggplot() +
-  geom_sf(aes(col = SEXO), alpha = .2) +
-  facet_grid(SEXO~FECHA_RESULTADO) +
+  ____(aes(col = SEXE), alpha = .2) +
+  facet_grid(SEXE~____) +
   guides(col = F, scale = "none")
+```
+
+```{r sex_date-solution }
+covid_p %>%
+  filter(DATE_RESULTAT == "2020-04-11" |
+           DATE_RESULTAT == "2020-12-11") %>%
+  ggplot() +
+  geom_sf(aes(col = SEXE), alpha = .2) +
+  facet_grid(SEXE~DATE_RESULTAT) +
+  guides(col = F, scale = "none")
+```
+
+```{r sex_date-check}
+grade_code()
 ```
 
 `mapview` permet de regrouper plusieurs couches avec les opérateurs `+`
 et `|`. Plus de détails dans la [documentation du
 package](https://r-spatial.github.io/mapview/reference/ops.html).
 
-```{r sex_date_mv, exercise = T, warning=F, message=F}
-m1 <- covid_p %>%
-  filter(FECHA_RESULTADO == "2020-04-11") %>%
-  mapview(zcol = "SEXO", layer.name = "2020-04-11 - SEXO")
+> Utilisez `mapview` pour visualiser les données du 11 avril 2020 et du 11 décembre 2020 par sexe.
 
-m2 <- covid_p %>%
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
-  mapview(zcol = "SEXO", layer.name = "2020-12-11 - SEXO")
+```{r sex_date_mv, exercise = TRUE, warning=F, message=F}
+m1 <- ____
+
+m2 <- ____
 
 m1 + m2
 ```
 
+```{r sex_date_mv-solution, eval = F}
+m1 <- covid_p %>%
+  filter(DATE_RESULTAT == "2020-04-11") %>%
+  mapview(zcol = "SEXE", layer.name = "2020-04-11 - SEXE")
+
+m2 <- covid_p %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(zcol = "SEXE", layer.name = "2020-12-11 - SEXE")
+
+m1 + m2
+```
+
+```{r sex_date_mv-check}
+grade_code()
+```
 
 **Composition**
 
@@ -553,18 +718,44 @@ représenter l'***échelle spatiale*** des données et ***le nord***. Les
 deux fonctionnalités peuvent être représentées graphiquement avec le
 package `ggspatial`.
 
-```{r ggspat, exercise = T, warning=F, message=F}
+
+> Ajoutez une échelle et une flèche de direction sur la carte ci-dessous:
+  
+```{r ggspat, exercise = TRUE, warning=F, message=F}
 covid_p %>%
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
   ggplot() +
   geom_sf(data = covid_sf) +
-  geom_sf(aes(col = EDAD), alpha = .2) +
+  geom_sf(aes(col = AGE), alpha = .2) +
+  scale_color_viridis_c(name = "Âge", option = "B") +
+  theme_bw()
+```
+
+```{r ggspat-hint-1 }
+# Pour ajouter une échelle, utilisez la fonction annotation_scale().
+```
+
+```{r ggspat-hint-2 }
+# Pour ajouter une flèche de direction, utilisez la fonction annotation_north_arrow().
+```
+
+```{r ggspat-solution}
+covid_p %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  ggplot() +
+  geom_sf(data = covid_sf) +
+  geom_sf(aes(col = AGE), alpha = .2) +
   scale_color_viridis_c(name = "Âge", option = "B") +
   annotation_scale() +
   annotation_north_arrow(location = "tr",
                          style = north_arrow_nautical)+
   theme_bw()
 ```
+
+```{r ggspat-check}
+grade_code()
+```
+
 
 ### Données en polygones
 
@@ -574,29 +765,51 @@ unités géographiques ou administratives. Dans cette section, nous
 explorerons la représentation des données dans des polygones spatiaux.
 
 **Une variable**
-
-> Nous utiliserons le remplissage de la géométrie (argument « fill »)
+  
+  > Utilisez le remplissage de la géométrie (argument « fill »)
 > pour représenter le nombre de cas de COVID-19 par districts de la
 > métropole de Lima. Il est important de noter que l'argument couleur
 > (`col`) est utilisé pour définir la couleur des bords géométriques.
 
-```{r plot_cases, exercise = T, warning=F, message=F, exercise.setup = "covid_sf"}
+```{r plot_cases, exercise = TRUE, warning=F, message=F}
 covid_sf %>%
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
-  ggplot() +
-  geom_sf(aes(fill = casos)) +
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  ____() +
+  ____(aes(____ = ____)) +
   scale_fill_continuous(name = "Nombre de cas") 
+```
+
+```{r plot_cases-solution}
+covid_sf %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  ggplot() +
+  geom_sf(aes(fill = nb_cas)) +
+  scale_fill_continuous(name = "Nombre de cas") 
+```
+
+```{r plot_cases-check}
+grade_code()
 ```
 
 Dans le cas d'un affichage dynamique avec `mapview`, le remplissage est
 également attribué avec l'argument `zcol`.
 
-```{r mv_cases, exercise = T, eval=F, exercise.setup = "covid_sf"}
-covid_sf %>% 
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
-  mapview(layer.name = "Nombre de cas", zcol = "casos")
+> Construisez une carte dynamique pour visualiser le nombre de cas de
+> COVID-19 par districts de la métropole de Lima le 11 décembre 2020.
+
+```{r mv_cases, exercise = TRUE, eval=F}
+
 ```
 
+```{r mv_cases-solution}
+covid_sf %>% 
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(layer.name = "Nombre de cas", zcol = "nb_cas")
+```
+
+```{r mv_cases-check}
+grade_code()
+```
 
 **Deux variables ou plus**
 
@@ -604,27 +817,27 @@ Nous sélectionnerons 2 dates pour comparer l'évolution de l'épidémie.
 Nous utiliserons la couleur pour représenter le nombre de cas et la
 facette pour comparer les deux dates.
 
-```{r facet_plot_cases, exercise = T, warning=F, message=F, exercise.setup = "covid_sf"}
+```{r facet_plot_cases, exercise = TRUE, warning=F, message=F, exercise.setup = "covid_sf"}
 covid_sf %>%
-  filter(FECHA_RESULTADO == "2020-04-11" |
-           FECHA_RESULTADO == "2020-12-11") %>%
+  filter(DATE_RESULTAT == "2020-04-11" |
+           DATE_RESULTAT == "2020-12-11") %>%
   ggplot() +
-  geom_sf(aes(fill = casos)) +
+  geom_sf(aes(fill = nb_cas)) +
   scale_fill_continuous(name = "Nombre de cas") +
-  facet_grid(.~FECHA_RESULTADO)
+  facet_grid(.~DATE_RESULTAT)
 ```
 
 Nous pouvons également visualiser la distribution spatiale des deux
 dates de manière dynamique.
 
-```{r mv_two_cases, exercise = T, warning=F, message=F, exercise.setup = "covid_sf"}
+```{r mv_two_cases, exercise = TRUE, warning=F, message=F, exercise.setup = "covid_sf"}
 d1 <- covid_sf %>%
-  filter(FECHA_RESULTADO == "2020-04-11") %>%
-  mapview(zcol = "casos", layer.name = "2020-04-11 - Nombre de cas")
+  filter(DATE_RESULTAT == "2020-04-11") %>%
+  mapview(zcol = "nb_cas", layer.name = "2020-04-11 - Nombre de cas")
 
 d2 <- covid_sf %>%
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
-  mapview(zcol = "casos", layer.name = "2020-12-11 - Nombre de cas")
+  filter(DATE_RESULTAT == "2020-12-11") %>%
+  mapview(zcol = "nb_cas", layer.name = "2020-12-11 - Nombre de cas")
 
 d1 + d2
 ```
@@ -636,11 +849,11 @@ Comme pour les données ponctuelles, nous pouvons utiliser les mêmes
 outils pour générer une meilleure composition de notre représentation
 spatiale.
 
-```{r better_visual, exercise = T, warning=F, message=F, exercise.setup = "covid_sf"}
+```{r better_visual, exercise = TRUE, warning=F, message=F, exercise.setup = "covid_sf"}
 covid_sf %>%
-  filter(FECHA_RESULTADO == "2020-12-11") %>%
+  filter(DATE_RESULTAT == "2020-12-11") %>%
   ggplot() +
-  geom_sf(aes(fill = casos)) +
+  geom_sf(aes(fill = nb_cas)) +
   scale_fill_viridis_c(name = "Nombre de cas", option = "F", direction = -1) +
   annotation_scale() +
   annotation_north_arrow(location = "tr",
@@ -666,15 +879,15 @@ des processus continus (par exemple les précipitations), telles que le
 ***Krigeage***.
 
 Pour estimer la densité du noyau, nous définirons une **fenêtre**
-d'analyse spatiale en utilisant la fonction `owin` du package
+  d'analyse spatiale en utilisant la fonction `owin` du package
 [`spatstat`](https://spatstat.org/). Ensuite, nous utiliserons la
 fonction `ppp` pour définir un objet de la classe **ppp** (point pattern
 process) à partir des coordonnées des cas. Enfin, nous utiliserons la
 fonction `density` pour estimer la densité du noyau.
 
-```{r owin, exercise = T, message=F, warning=F}
+```{r owin, exercise = TRUE, message=F, warning=F}
 covid_subset <- covid %>%
-  filter(FECHA_RESULTADO == "2020-05-05")
+  filter(DATE_RESULTAT == "2020-05-05")
 
 covid_win <- owin(xrange = range(covid_subset$lon),
                   yrange = range(covid_subset$lat))
@@ -683,7 +896,7 @@ covid_win <- owin(xrange = range(covid_subset$lon),
 Ensuite, nous définissons l'objet de motif de points ( ***ppp*** ) à
 partir des enregistrements de cas.
 
-```{r covid_ppp, exercise = T,message=F,warning=F, exercise.setup = "owin"}
+```{r covid_ppp, exercise = TRUE, message=F,warning=F, exercise.setup = "owin"}
 covid_ppp  <-  ppp(covid_subset$lon, 
                    covid_subset$lat, 
                    window = covid_win)
@@ -694,7 +907,7 @@ classes **rasterLayer**. Nous éliminerons les zones en dehors de notre
 zone d'étude en utilisant la fonction `mask` et en utilisant notre objet
 spatial de limites métropolitaines de Lima (`lima_sf`).
 
-```{r density_raster_cov,message=F,warning=F, exercise = T, exercise.setup = "covid_ppp"}
+```{r density_raster_cov,message=F,warning=F, exercise = TRUE, exercise.setup = "covid_ppp"}
 density_raster_cov <- raster(density(covid_ppp, bw.ppl), 
                               crs = 4326) |>
   mask(lima_sf)
@@ -702,12 +915,10 @@ density_raster_cov <- raster(density(covid_ppp, bw.ppl),
 
 La densité peut être représentée de la manière suivante :
 
-```{r mv_density, exercise = T, exercise.setup = "density_raster_cov"}
+```{r mv_density, exercise = TRUE, exercise.setup = "density_raster_cov"}
 density_raster_cov |> 
   mapview()
 ```
-
-
 
 ## Détection de clusters
 
@@ -722,19 +933,19 @@ publique et la recherche en épidémiologie.
 ### Données de motif de points:
 
 #### Statistiques d'analyse spatiale (Spatial Scan Statistics-SSS):
-
-Pour calculer les statistiques de balayage spatial, il est d'abord
+  
+  Pour calculer les statistiques de balayage spatial, il est d'abord
 nécessaire d'utiliser les données des modèles de points ou de la classe
 ***ppp***:
-
-> Dans cet exemple, pour définir une variable binaire, nous utiliserons
+  
+  > Dans cet exemple, pour définir une variable binaire, nous utiliserons
 > les cas détectés par PCR comme infections récentes (positives) et par
 > d'autres méthodes (par exemple Antibody Test - PR) comme infections
 > passées (négatives).
 
-```{r covid_scan_ppp, exercise = T, message=F, warning=F}
+```{r covid_scan_ppp, exercise = TRUE, message=F, warning=F}
 covid_subset_posi <- covid %>%
-  filter(FECHA_RESULTADO == "2020-05-05") %>%
+  filter(DATE_RESULTAT == "2020-05-05") %>%
   mutate(positividad = ifelse(METODODX == "PCR", 1, 0))
 
 covid_scan_ppp <- ppp(covid_subset_posi$lon, 
@@ -755,25 +966,24 @@ de points.
 > d'hypothèse. À d'autres fins, il est recommandé d'augmenter le nombre
 > de simulations.
 
-```{r covid_scan_test, message=F, warning=F, exercise = T, exercise.setup = "covid_scan_ppp"}
+```{r covid_scan_test, message=F, warning=F, exercise = TRUE, exercise.setup = "covid_scan_ppp"}
 covid_scan_test <- spscan.test(covid_scan_ppp,
                                nsim = 49, case = 2, 
                                maxd=1, alpha = 0.05)
 ```
 
-L'objet de type « spscan » contient des informations sur le cluster
+L'objet de type `spscan` contient des informations sur le cluster
 détecté:
 
 -   `locids`: les emplacements inclus dans le cluster,
 -   `coords`: les coordonnées du centre de gravité du cluster,
 -   `r` : le rayon du cluster,
 -   `rr` : le risque relatif (RR) au sein du cluster,
--   `pvalue` : valeur=p du test d'hypothèse calculé par simulations
-    Monte Carlo.
+-   `pvalue` : valeur=p du test d'hypothèse calculé par simulations Monte Carlo.
 
 entre autres.
 
-```{r show_covid_scan_test, message=F, warning=F, exercise = T, exercise.setup = "covid_scan_test"}
+```{r show_covid_scan_test, message=F, warning=F, exercise = TRUE, exercise.setup = "covid_scan_test"}
 covid_scan_test
 ```
 
@@ -781,7 +991,7 @@ Pour représenter graphiquement le cluster détecté, le sous-ensemble
 d'analyse est converti en une classe adaptée à la représentation
 spatiale.
 
-```{r clust, message=F, warning=F, exercise = T, exercise.setup = "covid_scan_test"}
+```{r clust, message=F, warning=F, exercise = TRUE, exercise.setup = "covid_scan_test"}
 # Nous construisons le centre de gravité du cluster
 cent <- tibble(lon = covid_scan_test$clusters[[1]]$coords[,1],
                lat = covid_scan_test$clusters[[1]]$coords[,2]) %>%
@@ -794,8 +1004,8 @@ clust <- cent %>%
 ```
 
 Nous allons tracer le cluster détecté à l'aide du package `mapview`:
-
-```{r cluster_points, exercise = T, exercise.setup = "clust"}
+  
+  ```{r cluster_points, exercise = T, exercise.setup = "clust"}
 cluster <- mapview(clust, alpha.regions = 0.2, color = "red") 
 
 points <- covid_subset_posi %>%
@@ -808,37 +1018,37 @@ cluster + points
 
 ### Données agrégées (en polygones)
 
-#### Autocorrélation spatiale (globale) : Moran I
+#### Autocorrélation spatiale (globale) : I de Moran
 
-Pour effectuer le calcul statistique global de ***Moran I***, nous
+Pour effectuer le calcul statistique global du ***I de Moran***, nous
 établissons d'abord l'ensemble de données d'analyse. En raison de la
 structure longitudinale de la base de données, nous filtrerons par date
 spécifique.
 
-```{r covid_sf_subset,message=F,warning=F, exercise = T, exercise.setup = "covid_sf"}
+```{r covid_sf_subset,message=F,warning=F, exercise = TRUE, exercise.setup = "covid_sf"}
 covid_sf_subset <- covid_sf %>%
-  filter(FECHA_RESULTADO == "2020-05-05") %>%
-  mutate(casos = replace_na(casos, 0))
+  filter(DATE_RESULTAT == "2020-05-05") %>%
+  mutate(nb_cas = replace_na(nb_cas, 0))
 ```
 
 Ensuite, en fonction de la répartition des polygones (quartiers) dans la
 zone d'étude, nous définirons la matrice des quartiers.
 
-```{r covid_nb, message=F,warning=F, exercise = T, exercise.setup = "covid_sf_subset"}
+```{r covid_nb, message=F,warning=F, exercise = TRUE, exercise.setup = "covid_sf_subset"}
 covid.nb <- poly2nb(covid_sf_subset, queen=TRUE,snap = 0.13)
 ```
 
 Avec la matrice de voisinage on effectue le calcul de la matrice de
 poids spatial.
 
-```{r covid_lw, message=F,warning=F, exercise = T, exercise.setup = "covid_nb"}
+```{r covid_lw, message=F,warning=F, exercise = TRUE, exercise.setup = "covid_nb"}
 covid.lw <- nb2listw(covid.nb, style="W", zero.policy=TRUE)
 ```
 
 Enfin, nous effectuons le calcul du **test global du I de Moran** :
-
-```{r moran, exercise = T, exercise.setup = "covid_lw"}
-moran.test(covid_sf_subset$casos, covid.lw)
+  
+  ```{r moran, exercise = T, exercise.setup = "covid_lw"}
+moran.test(covid_sf_subset$nb_cas, covid.lw)
 ```
 
 > remarque : Le test implémenté par défaut utilise un calcul analytique
@@ -864,7 +1074,7 @@ labels <- c("Cold spot",
 Nous effectuons le calcul de la statistique **Getis Ord**:
 
 ```{r covid_sf_gi, message=F,warning=F, exercise = T, exercise.setup = "covid_lw"}
-covid_lg <- localG(covid_sf_subset$casos, covid.lw)
+covid_lg <- localG(covid_sf_subset$nb_cas, covid.lw)
 
 covid_sf_gi<-covid_sf_subset %>% 
   mutate(cluster_lg=cut(covid_lg, include.lowest = TRUE,
