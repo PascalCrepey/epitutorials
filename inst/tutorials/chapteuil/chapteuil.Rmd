@@ -1,0 +1,277 @@
+---
+title: "Saint-Julien de Chapteuil: Un invité venu du froid"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    allow_retry: true
+    allow_reset: true
+    language: fr
+runtime: shiny_prerendered
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+library(epitutorials)
+library(tidyverse)
+library(ggplot2)
+library(kableExtra)
+library(gradethis)
+
+gradethis_setup()
+```
+
+## Introduction
+
+Cette étude de cas est basée sur l'investigation d'une épidémie de
+gastro-entérite survenue en 2005 dans la ville de Saint-Julien de
+Chapteuil, un petit bourg de Haute-Loire regroupant environ 1800
+habitants.
+
+```{r echo=FALSE, fig.cap="Wikipedia", out.width = '70%', fig.align= "center"}
+knitr::include_graphics("https://upload.wikimedia.org/wikipedia/commons/9/9b/Saint-Julien-Chapteuil_Vue_g%C3%A9n%C3%A9rale2.JPG")
+```
+
+### Résultats d'apprentissage
+
+A la fin de cet exercice le stagiaire sera capable de :
+
+-   repérer les différentes étapes d’une investigation ;
+
+-   construire et interpréter une courbe épidémique ;
+
+-   formuler des hypothèses sur les durées d’incubation et les agents
+    pathogènes ;
+
+-   effectuer les comparaisons permettant d’identifier des facteurs de
+    risques potentiels ;
+
+-   proposer des mesures de contrôle et de prévention.
+
+## Réception et traitement du signal
+
+Le mercredi 23 mars 2005, le point focal régional (PFR) de l’Agence
+régionale de Santé (ARS) Auvergne-Rhône-Alpes reçoit un appel du médecin
+de l’inspection académique qui lui signale un absentéisme important dans
+un établissement de Saint-Julien-de-Chapteuil en Haute-Loire. C'est le
+principal du collège qui lui a signalé cette situation : environ trente
+élèves ne se sont pas présentés au collège le matin même et la plupart
+des familles des enfants absents évoquent des signes digestifs.
+
+> Vous travaillez au sein de la plateforme de veille et d’alerte de
+> l’ARS et vous réceptionnez ce signal. Comment traitez-vous dans un
+> premier temps ce signal ? Quels premiers éléments recueillez-vous et
+> auprès de qui ?
+
+## Premiers éléments
+
+Mercredi en fin de matinée, les premiers éléments recueillis auprès de
+l'encadrement de l'établissement permettent d'avoir une idée plus
+précise de la situation : au total, 60 élèves (la majorité
+demi-pensionnaires) et un enseignant sont malades. Ils ont présenté une
+symptomatologie digestive (douleurs abdominales, vomissements et
+diarrhée) apparue brutalement dans la deuxième partie de la nuit du
+mardi au mercredi. Seuls quelques cas auraient présenté de la fièvre.
+
+Le mardi 22 mars, 10 élèves étaient absents. Selon le principal,
+l'absentéisme de fond ne dépasse pas cinq élèves en cette période de
+l'année.
+
+Aucun cas n'a été hospitalisé.
+
+Les médecins généralistes du secteur contactés par l’équipe de la
+plateforme de veille et d’alerte de l’ARS n'ont pas noté d'augmentation
+récente de consultations liées à des pathologies digestives dans la
+population générale. Les médecins des services d’urgence du Centre
+hospitalier Emile Roux du Puy-en-Velay n’ont pas observé un nombre
+inhabituel de pathologies digestives.
+
+L'établissement compte au total 30 enseignants et 334 élèves dont 298
+sont demi-pensionnaires, il n'y a pas d'internat.
+
+Les repas sont préparés tous les jours par la cuisine du collège. Aucun
+événement particulier commun aux malades n'a eu lieu au sein ni en
+dehors du collège dans les jours précédents.
+
+> Cet évènement constitue-t-il selon vous une alerte de santé publique ?
+> Argumentez.
+
+## Conduite de l'investigation
+
+Vous considérez que cette situation constitue une alerte de santé
+publique de portée locale à gérer avec l'appui de la Cellule régionale
+de Santé publique France en ARA. Après une rapide concertation, vous
+décidez de mener une investigation.
+
+> Précisez les objectifs d'une telle investigation.
+
+### 
+
+> Quelles hypothèses pouvez-vous formuler à partir des premières
+> informations recueillies ?
+
+### 
+
+> Quelles sont les différentes étapes de l'investigation que vous allez
+> mener ?
+
+## L'enquête commence...
+
+Au cours de la réunion à laquelle ont participé l’ARS, la CR de SpF, la
+direction départementale de protection des populations de Haute-Loire
+(DDPP, équivalent des services vétérinaires) et le médecin de
+l'inspection académique, vous avez décidé que l'investigation sur le
+terrain serait pilotée par la CR de SpF avec le concours de l'infirmière
+du collège et de l'infirmière de l’ARS.
+
+L'inspection académique se charge d’informer le principal du déroulement
+de l'enquête et de mettre en place une information à destination des
+parents d’élèves, tandis que la DDPP 43 mène de son côté une inspection
+des cuisines.
+
+> De quel type d’information avez-vous besoin pour mener votre
+> investigation et comment construisez-vous le questionnaire ?
+
+## l'enquête continue...
+
+L’enquête épidémiologique a consisté à administrer aux élèves
+demi-pensionnaires et aux personnes fréquentant la cantine, présents le
+jeudi 24/03 après-midi, un questionnaire standardisé comportant des
+variables d’identification (âge, sexe, classe ou profession), des
+variables décrivant la présence ou l'absence de signes généraux et
+digestifs, leur date et leur horaire de survenue, et des variables
+d’exposition décrivant les aliments consommés au cours des repas pris au
+collège les lundi 21 et mardi 22 mars.
+
+Au total, 259 questionnaires (soit 87% des demi-pensionnaires) ont été
+complétés sur place par une équipe constituée d’une infirmière de santé
+publique de l’ARS, d’une épidémiologiste de la CR de SpF, de
+l'infirmière du collège et d'une autre personne appartenant à
+l’encadrement du collège.
+
+Une enquête téléphonique réalisée le surlendemain a permis d’interroger
+11 élèves supplémentaires, absents lors du passage à l’école.
+
+Les questionnaires ont été saisis et analysés par la CR de SpF à l’aide
+des logiciels Epidata et Epiinfo.
+
+Des agents de la DDPP43 ont effectué une inspection de la cuisine le
+mercredi 23 mars et ont réalisé des prélèvements alimentaires, à partir
+des repas témoins, pour les repas du 21 et du 22 mars.
+
+A ce stade de l'investigation, la CR de SpF décide de comptabiliser
+l'ensemble des cas.
+
+> Proposez une définition de cas en argumentant votre choix.
+
+## Analyse de l'information
+
+Au cours de cette investigation, un cas a été défini comme un
+demi-pensionnaire du collège ou une personne fréquentant la cantine du
+collège ayant présenté depuis le lundi 21 mars midi, au moins deux des
+signes suivants : vomissements, nausées, douleurs abdominales et
+diarrhée, à l’exception de l’association nausées - douleurs abdominales
+jugée trop peu spécifique.
+
+Dans l'ensemble des questionnaires recueillis, 84 élèves correspondaient
+à la définition de cas retenue. Le tableau suivant décrit les signes
+cliniques déclarés par les cas au cours de l'investigation ainsi que le
+moment de leur survenue.
+
+> Dressez le tableau de fréquence des signes cliniques chez les cas.
+
+### 
+
+> Représentez graphiquement la distribution des cas selon l'heure de
+> survenue des premiers symptômes.
+
+### 
+
+> Quelles informations vous apportent l'analyse de la courbe et du
+> tableau de fréquence des signes ?
+
+## l'enquête avance...
+
+L’allure de la courbe oriente vers une source commune et ponctuelle. Son
+étendue suggère une contamination pendant le repas du lundi 21 mars.
+L’exploitation des questionnaires alimentaires pour les repas doit
+permettre d’identifier le ou les aliments responsables.
+
+Le tableau suivant décrit la consommation, par les cas, des plats servis
+au cours du repas du lundi 21 mars.
+
+> Calculez les fréquences de consommation des plats chez les cas. Qu’en
+> concluez-vous ?
+
+### 
+
+> De quelle information avez-vous besoin pour identifier l’aliment
+> responsable ?
+
+## l'étau se resserre...
+
+La fréquence de consommation des plats chez les non-malades a été
+recueillie au cours de l'enquête. Le tableau suivant décrit les
+fréquences de consommation chez les malades et les non-malades.
+
+> En vous servant du tableau 3 quel(s) aliment(s) pouvez-vous suspecter
+> ?
+
+### 
+
+> Quelle autre démarche épidémiologique aurait pu être utilisée pour
+> identifier le véhicule de la toxi-infection ?
+
+## le coupable est démasqué...
+
+Les analyses statistiques ont montré que la consommation des brisures de
+framboises étaient associées à l’apparition de la maladie.
+
+> Quels autres résultats pourraient être utiles pour conforter les
+> résultats de l'étude épidémiologique ?
+
+### 
+
+> Quelles mesures peuvent être entreprises à ce stade, avant la
+> communication des résultats de l'investigation ?
+
+## Epilogue
+
+Des norovirus ont été retrouvés par le Centre national de référence des
+virus entériques dans cinq prélèvements de selles d’élèves. L’enquête
+épidémiologique mettait en évidence une consommation de framboises
+associée à l’apparition de la maladie. Les lots de framboises congelées
+en provenance de Serbie (encore stockés chez le distributeur de surgelés
+à Rodez) ont été détruits.
+
+Suite à cette investigation épidémiologique, une alerte européenne a été
+lancée par Santé publique France.
+
+Toutefois, il n’y a pas eu retrait de lot au niveau européen, aucun
+norovirus n’ayant été isolé dans les framboises et aucune autre alerte
+n'ayant été notifiée.
+
+A l'issue de l'enquête, il n’a donc pas été possible d’affirmer le lien
+virologique entre la contamination des framboises et la toxi-infection
+alimentaire collective survenue au collège. Des toxi-infections
+alimentaires collectives similaires, mettant en cause des framboises
+surgelées provenant de pays d’Europe de l'Est, avaient déjà été
+rapportées dans la littérature…
+
+```{r, echo=FALSE, fig.cap=" Cotterelle B, Drougard C, Rolland Jacqueline, Becamel M, Boudon M, Pinede S, Traoré O, Balay K, Pothier P, Espié E. Outbreak of norovirus infection associated with the consumption of frozen raspberries, France, March 2005. Euro Surveill. 2005;10(17):pii=2690. https://doi.org/10.2807/esw.10.17.02690-en", out.width = '100%', fig.align= "center"}
+knitr::include_url("https://www.eurosurveillance.org/content/10.2807/esw.10.17.02690-en")
+```
+
+## À propos de ce document
+
+### Contributions
+
+-   Benoit Cottrelle et Corinne Drougard - Mai 2007 - Cellule
+    interrégionale d'épidémiologie (Cellule régionale de Santé publique
+    France) - Clermont-Ferrand : version initiale
+-   IDEA : Adaptation pédagogique
+-   Pascal Crépey: adaptation `learnr` - 2024
