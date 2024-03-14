@@ -13,7 +13,7 @@ lima_covid <- lima_covid_orig |>
 lima_covid$SEXO <- factor(lima_covid$SEXO, levels = c("MASCULINO", "FEMENINO"), labels = c("Homme", "Femme"))
 lima_covid$DISTRITO <- as.factor(lima_covid$DISTRITO)
 #lima_covid$rango_edad <- as.factor(lima_covid$rango_edad)
-colnames(lima_covid) = c("DISTRICT", "AGE", "SEXE", "DATE_RESULTAT", "lon", "lat")
+colnames(lima_covid) = c("DISTRICT", "METODODX", "AGE", "SEXE", "DATE_RESULTAT", "lon", "lat")
 # library(data.table)
 # lima_covid_orig_dt = fread("https://zenodo.org/record/4915889/files/covid19data.csv?download=1")
 # 
@@ -34,6 +34,7 @@ lima_sf <- peru |>
   st_as_sf() |>
   # Nous filtrons les données spatiales uniquement de la métropole de Lima
   filter(NAME_2 == "Lima") 
+lima_sf[lima_sf$NAME_3=="Magdalena Vieja",]$NAME_3 = "PUEBLO LIBRE"
 
 usethis::use_data(lima_covid, overwrite = TRUE)
 usethis::use_data(lima_sf, overwrite = TRUE)
