@@ -251,7 +251,6 @@ l'analyse.
 # install.packages("tidyverse")
 # install.packages("sf")
 # install.packages("mapview")
-# install.packages("GADMTools")
 # remotes::install_github("paleolimbot/ggspatial")
 # install.packages("leaflet")
 # install.packages("leaflet.extras2")
@@ -260,6 +259,8 @@ l'analyse.
 # install.packages("raster")
 # install.packages("smacpod")
 # install.packages("ggspatial")
+# install.packages("geodata")
+# install.packages("kableExtra")
 ```
 
 Une fois les packages installés, vous devez ouvrir une nouvelle session
@@ -961,14 +962,14 @@ Kulldorff*** dans [SatScan](https://www.satscan.org/) et implémenté dans
 calculer les statistiques de balayage spatial pour les données de motif
 de points.
 
-> Pour des raisons de coût de calcul, nous utiliserons **49 simulations
+> Pour des raisons de coût de calcul, nous utiliserons **5 simulations
 > de Monte Carlo** (`nsim`) pour déterminer la valeur p du test
 > d'hypothèse. À d'autres fins, il est recommandé d'augmenter le nombre
 > de simulations.
 
 ```{r covid_scan_test, message=F, warning=F, exercise = TRUE, exercise.setup = "covid_scan_ppp"}
 covid_scan_test <- spscan.test(covid_scan_ppp,
-                               nsim = 49, case = 2, 
+                               nsim = 5, case = 2, 
                                maxd=1, alpha = 0.05)
 ```
 

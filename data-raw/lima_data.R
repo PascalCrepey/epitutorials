@@ -8,7 +8,7 @@ lima_covid_orig <- read_csv(url("https://zenodo.org/record/4915889/files/covid19
 # et transforme en facteur les variables SEXO, 
 # et ne garder que les données de la première année
 lima_covid <- lima_covid_orig |>
-  select(-c(FECHA_CORTE, UUID, PROVINCIA, DEPARTAMENTO, METODODX, rango_edad)) |>
+  select(-c(FECHA_CORTE, UUID, PROVINCIA, DEPARTAMENTO, rango_edad)) |>
   filter(FECHA_RESULTADO <= "2020-12-31") 
 lima_covid$SEXO <- factor(lima_covid$SEXO, levels = c("MASCULINO", "FEMENINO"), labels = c("Homme", "Femme"))
 lima_covid$DISTRITO <- as.factor(lima_covid$DISTRITO)
