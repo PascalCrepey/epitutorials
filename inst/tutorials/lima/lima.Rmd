@@ -44,6 +44,7 @@ covid_count <- covid %>%
                                       max(DATE_RESULTAT, na.rm = T),
                                       by="day"),nesting(DISTRICT), fill = list(nb_cas = 0))
 
+lima_sf[lima_sf$NAME_3=="Magdalena Vieja",]$NAME_3 = "PUEBLO LIBRE"
 covid_sf <- lima_sf %>%
   mutate(DISTRICT = toupper(NAME_3)) %>%
   full_join(covid_count, by = "DISTRICT", "DATE_RESULTAT")
@@ -427,6 +428,9 @@ lima_sf <- peru %>%
   st_as_sf() %>%
   # Nous filtrons les données spatiales uniquement de la métropole de Lima
   filter(NAME_2 == "Lima") 
+
+#on corrige le nom d'un quartier
+lima_sf[lima_sf$NAME_3=="Magdalena Vieja",]$NAME_3 = "PUEBLO LIBRE"
 ```
 
 ###
