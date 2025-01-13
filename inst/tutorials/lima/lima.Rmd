@@ -242,7 +242,7 @@ Pour plus de détails, nous vous recommandons l'introduction du livre
 [Geocomputation with R](https://geocompr.robinlovelace.net/intro.html)
 de Robin Lovelace, Jakub Nowosad, Jannes Muenchow.
 
-## Packages nécessaires
+### Packages nécessaires
 
 Les packages suivants (disponibles sur CRAN ou gitHub) sont requis pour
 l'analyse.
@@ -1010,7 +1010,7 @@ clust <- cent %>%
 
 Nous allons tracer le cluster détecté à l'aide du package `mapview`:
   
-  ```{r cluster_points, exercise = T, exercise.setup = "clust"}
+```{r cluster_points, exercise = T, exercise.setup = "clust"}
 cluster <- mapview(clust, alpha.regions = 0.2, color = "red") 
 
 points <- covid_subset_posi %>%
@@ -1052,7 +1052,7 @@ covid.lw <- nb2listw(covid.nb, style="W", zero.policy=TRUE)
 
 Enfin, nous effectuons le calcul du **test global du I de Moran** :
   
-  ```{r moran, exercise = T, exercise.setup = "covid_lw"}
+```{r moran, exercise = T, exercise.setup = "covid_lw"}
 moran.test(covid_sf_subset$nb_cas, covid.lw)
 ```
 
@@ -1108,5 +1108,5 @@ respectivement élevée et faible.
 
 -   Gabriel Carrasco-Escobar, Antony Barja & Jesus Quispe: Version
     initiale
--   Pascal Crépey: Traduction en français, révision et adaptation learnr
+-   Pascal Crépey: Traduction en français, révision et adaptation `learnr`.
 
