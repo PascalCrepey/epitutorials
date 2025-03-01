@@ -32,6 +32,9 @@ options(tutorial.exercise.timelimit = 60,
 ```
 
 ## Introduction
+###
+
+Ce tutoriel a pour objectif de vous familiariser avec la librairie data.table, de charger des données directement depuis une URL, d'ajouter une colonne dans une data.table et de visualiser des données sur une carte et de manière interactive.
 ## Découvrir data.table et ses principales fonctions
 
 Lien vers la documentation de la librairie data.table : [https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html)
