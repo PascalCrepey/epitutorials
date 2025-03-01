@@ -1,0 +1,243 @@
+---
+title: "Lab - Manipulation de données et visualisation interactive"
+author: "Pascal Crépey"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+tutorial:
+  id: data-visualization
+output:
+  learnr::tutorial:
+    progressive: yes
+    allow_skip: yes
+runtime: shiny_prerendered
+description: "Ce tutoriel a pour objectif de vous familiariser avec la librairie data.table, de charger des données directement depuis une URL, d'ajouter une colonne dans une data.table et de visualiser des données de manière interactive."
+---
+```{r setup, include = FALSE}
+library(learnr)
+library(tutorial.helpers)
+library(knitr)
+library(tidyverse)
+library(ggthemes) 
+library(data.table)
+
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(out.width = '90%')
+options(tutorial.exercise.timelimit = 60, 
+        tutorial.storage = "local") 
+```
+
+```{r copy-code-chunk, child = system.file("child_documents/copy_button.Rmd", package = "tutorial.helpers")}
+```
+
+```{r info-section, child = system.file("child_documents/info_section.Rmd", package = "tutorial.helpers")}
+```
+
+## Introduction
+## Découvrir data.table et ses principales fonctions
+
+Lien vers la documentation de la librairie data.table : [https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html)
+
+Lien vers la cheatsheet de data.table : [https://s3.amazonaws.com/assets.datacamp.com/blog_assets/datatable_Cheat_Sheet_R.pdf](https://s3.amazonaws.com/assets.datacamp.com/blog_assets/datatable_Cheat_Sheet_R.pdf)
+
+## Charger des données directement depuis une URL
+
+**Chargez les données provenant de data.gouv.fr dans la variable baseAllHosp.**
+
+L'URL utilisée est la suivante : [https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c](https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c)
+
+```{r load, solution = TRUE, eval = TRUE, cache=TRUE}
+library(data.table)
+
+dtbaseAllHosp = fread("https://www.data.gouv.fr/fr/datasets/r/6fadff46-9efd-4c53-942a-54aca783c30c")
+
+```
+Décrire la structure des données: 
+
+```{r}
+str(dtbaseAllHosp)
+
+```
+
+Explorer les données avec DataExplorer:
+
+```{r}
+library(DataExplorer)
+
+plot_intro(dtbaseAllHosp)
+
+plot_missing(dtbaseAllHosp)
+
+```
+
+
+## Ajouter une colonne dans une data.table
+
+Nous allons ajouter le nom des départements en fonction du code départemental.
+
+```{r}
+# charger la table de correspondance entre nom de département et code départemental
+code_dep = fread("https://docs.google.com/spreadsheets/d/e/2PACX-1vQcojUbY0DqjJ0jKSJnVmn02JtFyKU_3TA0jD0ydUp5FlkKKi_Zg-XsoE4JGysBcm2PmW5_tNjGWBjp/pub?gid=874746672&single=true&output=csv")
+
+rbind(head(code_dep, 3), 
+      data.table(code_dep = "...", nom_dep = "..."), 
+      tail(code_dep, 3)) |> 
+  flextable::flextable()
+
+```
+
+Maintenant on ajoute les noms de départements dans les données de base grâce à une jointure. 
+
+```{r}
+dtbaseAllHosp_with_Dep = merge(dtbaseAllHosp, code_dep, by.x = "dep", by.y = "code_dep", all.x = TRUE)
+
+
+```
+
+Dans un premier temps, on va calculer la somme des décès et la somme des hospitalisations par département.
+
+```{r}
+deces_hosp_par_dep = dtbaseAllHosp_with_Dep[, .(deces = sum(incid_dc),
+                                           hospitalisations = sum(incid_hosp)), 
+                                       by = c("nom_dep", "dep")]
+
+```
+
+```{r}
+#install.packages("ggiraph")
+library(ggiraph)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+library(here)
+
+
+# data_id in the aes mapping
+p1 <- ggplot(deces_hosp_par_dep, aes(deces, hospitalisations, tooltip = nom_dep, data_id = nom_dep)) +
+  geom_point_interactive(size = 4)
+
+# data_id in the aes mapping
+p2 <- ggplot(deces_hosp_par_dep) +
+  geom_col_interactive(aes(x = reorder(nom_dep, deces), 
+                 y = deces, 
+                 tooltip = nom_dep, 
+                 data_id = nom_dep)) +
+  scale_x_discrete(name = NULL) +
+  coord_flip()
+
+combined_plot <- p1 + p2 #+ plot_layout(ncol = 2)
+
+interactive_plot <- girafe(ggobj = combined_plot)
+
+htmltools::save_html(interactive_plot, file = here("TP-Visu", "combined_deces_hosp.html"))
+interactive_plot
+```
+
+
+## Visualisation de données géographiques
+
+On récupère les données géographiques.
+
+```{r}
+library(geodata)
+library(sf)
+fr_map = geodata::gadm("FRA", path = ".", level=2)
+
+sf_fr_map = st_as_sf(fr_map)
+
+```
+
+Ce qui nous permet de créer une carte.
+```{r}
+library(ggplot2)
+
+ggplot() + geom_sf(data = sf_fr_map, fill = "white", color = "black") 
+```
+
+On va maintenant ajouter les données de décès et d'hospitalisation par département 
+dans les données de la carte.
+
+```{r}
+deces_hosp_par_dep_sf = merge(sf_fr_map, deces_hosp_par_dep, by.x = "CC_2", by.y = "dep", all.x = TRUE)
+
+
+```
+
+On peut afficher cette carte avec les données de décès et d'hospitalisation.
+
+```{r}
+# Create the third chart (choropleth)
+p3 <- ggplot() +
+  geom_sf(data = deces_hosp_par_dep_sf, fill = "lightgrey", color = "lightgrey") +
+  geom_sf_interactive(
+    data = filter(deces_hosp_par_dep_sf, !is.na(deces)),
+    aes(fill = deces, tooltip = NAME_2, data_id = NAME_2)
+  ) +
+  coord_sf(crs = st_crs(3857)) +
+  theme_void() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  )
+p3
+```
+
+
+
+```{r}
+# Create the first chart (Scatter plot)
+p1 <- ggplot(deces_hosp_par_dep_sf, aes(deces, hospitalisations, tooltip = nom_dep, data_id = CC_2)) +
+  geom_point_interactive(size = 4) +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  )
+
+# Create the second chart (Bar plot)
+p2 <- ggplot(deces_hosp_par_dep_sf) +
+  geom_col_interactive(aes(x = reorder(nom_dep, deces), 
+                 y = deces, 
+                 tooltip = nom_dep, 
+                 data_id = CC_2)) +
+  scale_x_discrete(name = NULL) +
+  coord_flip() +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  )
+
+# Create the third chart (choropleth)
+p3 <- ggplot() +
+  geom_sf(data = deces_hosp_par_dep_sf, fill = "lightgrey", color = "lightgrey") +
+  geom_sf_interactive(
+    data = filter(deces_hosp_par_dep_sf, !is.na(deces)),
+    aes(fill = deces, tooltip = CC_2, data_id = CC_2)
+  ) +
+  coord_sf(crs = st_crs(3857)) +
+  theme_void() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none"
+  )
+
+# Combine the plots
+combined_plot <- (p3 / p1) | p2 # + plot_layout(heights = c(1, 2))
+
+# Create the interactive plot
+interactive_plot <- girafe(ggobj = combined_plot)
+interactive_plot <- girafe_options(
+  interactive_plot,
+  opts_hover(css = "fill:red;stroke:black;")
+)
+
+# save as an html widget
+htmltools::save_html(interactive_plot, "combined_dece_hosp_map.html")
+interactive_plot
+```
+
+```{r download-answers, child = system.file("child_documents/download_answers.Rmd", package = "tutorial.helpers")}
+```
