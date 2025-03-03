@@ -1,10 +1,10 @@
 Package: epitutorials
-Title: What the Package Does (One Line, Title Case)
+Title: Series de tutoriels en Français pour l'analyse de données épidémiologiques
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Pascal", "Crépey", , "pascal.crepey@ehesp.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-1852-0752"))
+Description: Ce package fournit plusieurs tutoriels à destination des cours enseignés à l'EHESP en épidémiologie et biostatistiques. 
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -16,3 +16,15 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Config/testthat/parallel: true
+Imports: 
+    data.table,
+    DataExplorer,
+    geodata,
+    ggiraph,
+    ggplot2,
+    ggrepel,
+    here,
+    knitr,
+    learnr,
+    sf,
+    tutorial.helpers
