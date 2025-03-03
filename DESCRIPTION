@@ -1,5 +1,5 @@
 Package: epitutorials
-Title: Series de tutoriels en Français pour l'analyse de données épidémiologiques
+Title: Serie de tutoriels en Français pour l'analyse de données épidémiologiques
 Version: 0.0.0.9000
 Authors@R: 
     person("Pascal", "Crépey", , "pascal.crepey@ehesp.fr", role = c("aut", "cre"),
