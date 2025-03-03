@@ -38,7 +38,7 @@ library(patchwork)
 # usethis::use_data(dtbaseAllHosp, overwrite = TRUE)
 
 #raw data
-mydata = copy(dtbaseAllHosp)
+mydata = copy(epitutorials::dtbaseAllHosp)
 
 #deces hosp par dept
 deces_hosp_par_dep = mydata[, list(deces = sum(incid_dc), hospitalisations = sum(incid_hosp)), by = "dep"]
