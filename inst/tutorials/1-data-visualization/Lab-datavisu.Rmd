@@ -363,7 +363,7 @@ mydata[, sum(...)]
 ```
 
 ```{r premiers-calculs-1-test, include = FALSE}
-mydata[, sum(incid_dc)]
+#mydata[, sum(incid_dc)]
 ```
 
 ### 
@@ -391,12 +391,11 @@ mydata[, list(sum(incid_dc), sum(...))]
 ```
 
 ```{r premiers-calculs-2-test, include = FALSE}
-mydata[, list(sum(incid_dc), sum(incid_hosp))]
+#mydata[, list(sum(incid_dc), sum(incid_hosp))]
 ```
 
 ### 
 
-Nous savons maintenant qu'il y a eu un total de `r mydata[, sum(incid_hosp)]` hospitalisations et `r mydata[, sum(incid_dc)]` décès liés au Covid-19 en France sur la période concernée.
 Il serait intéressant d'avoir ces informations par département pour mieux comprendre la situation et visualiser d'éventuelles disparités.
 
 ### Exercise 3
@@ -421,7 +420,7 @@ Copy previous code
 ```
 
 ```{r premiers-calculs-3-test, include = FALSE}
-mydata[, list(sum(incid_dc), sum(incid_hosp)), by = "dep"]
+#mydata[, list(sum(incid_dc), sum(incid_hosp)), by = "dep"]
 ```
 
 ### 
@@ -448,8 +447,8 @@ deces_hosp_par_dep
 ```
 
 ```{r premiers-calculs-4-test, include = FALSE}
-deces_hosp_par_dep = mydata[, list(deces = sum(incid_dc), hospitalisations = sum(incid_hosp)), by = "dep"]
-deces_hosp_par_dep
+#deces_hosp_par_dep = mydata[, list(deces = sum(incid_dc), hospitalisations = sum(incid_hosp)), by = "dep"]
+#deces_hosp_par_dep
 ```
 
 ### 
@@ -547,9 +546,9 @@ ggplot(deces_hosp_par_dep[deces > ...,], aes(x = reorder(dep, deces), y = deces)
 ```
 
 ```{r premiers-calculs-8-test, include = FALSE}
-ggplot(deces_hosp_par_dep[deces > 2050,], aes(x = reorder(dep, deces), y = deces)) +
-  geom_col() +
-  coord_flip() 
+# ggplot(deces_hosp_par_dep[deces > 2050,], aes(x = reorder(dep, deces), y = deces)) +
+#   geom_col() +
+#   coord_flip() 
 ```
 
 ### Exercise 9
@@ -567,13 +566,13 @@ Améliorez la visualisation du graphique pour le faire ressembler à celui prés
 ```
 
 ```{r premiers-calculs-9-test, include = FALSE}
-ggplot(deces_hosp_par_dep[deces > 2050,], aes(x = reorder(dep, deces), y = deces)) +
-  geom_col() +
-  scale_x_discrete(name = "Départements") +
-  scale_y_continuous(name = "Nombre de décès liés à la COVID-19") +
-  coord_flip() +
-  ggtitle("Top 20 des départements avec le plus décès liés à la COVID-19") +
-  theme_minimal(14) 
+# ggplot(deces_hosp_par_dep[deces > 2050,], aes(x = reorder(dep, deces), y = deces)) +
+#   geom_col() +
+#   scale_x_discrete(name = "Départements") +
+#   scale_y_continuous(name = "Nombre de décès liés à la COVID-19") +
+#   coord_flip() +
+#   ggtitle("Top 20 des départements avec le plus décès liés à la COVID-19") +
+#   theme_minimal(14) 
 ```
 
 ### 
@@ -597,8 +596,8 @@ Une solution pourrait être d'utiliser les abscisses pour les décès et les ord
 ```
 
 ```{r premiers-calculs-10-test, include = FALSE}
-ggplot(deces_hosp_par_dep, aes(x = deces, y = hospitalisations)) +
-  geom_point() 
+# ggplot(deces_hosp_par_dep, aes(x = deces, y = hospitalisations)) +
+#   geom_point() 
   
 ```
 
@@ -619,10 +618,10 @@ C'est quand même dommage de perdre l'information sur les départements. On pour
 ```
 
 ```{r premiers-calculs-11-test, include = FALSE}
-ggplot(deces_hosp_par_dep, aes(x = deces, y = hospitalisations)) +
-  geom_point() +
-  ggrepel::geom_text_repel(aes(label = dep), size = 3) +
-  theme_minimal(14) 
+# ggplot(deces_hosp_par_dep, aes(x = deces, y = hospitalisations)) +
+#   geom_point() +
+#   ggrepel::geom_text_repel(aes(label = dep), size = 3) +
+#   theme_minimal(14) 
 ```
 
 ### 
@@ -688,8 +687,8 @@ plot(fr_map)
 ```
 
 ```{r visualisation-de-donnes-gograp-2-test, include = FALSE}
-fr_map = geodata::gadm("FRA", path = "data", level=2)
-plot(fr_map)
+# fr_map = geodata::gadm("FRA", path = "data", level=2)
+# plot(fr_map)
 ```
 
 ### 
