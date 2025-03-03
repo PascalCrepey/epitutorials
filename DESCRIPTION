@@ -8,7 +8,7 @@ Description: Ce package fournit plusieurs tutoriels à destination des cours ens
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 3.5)
 LazyData: true
@@ -28,4 +28,5 @@ Imports:
     learnr,
     patchwork,
     sf,
+    spdep,
     tutorial.helpers

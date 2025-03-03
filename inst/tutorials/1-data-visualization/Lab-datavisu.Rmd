@@ -39,11 +39,13 @@ library(patchwork)
 
 #raw data
 mydata = copy(epitutorials::dtbaseAllHosp)
-
+setDT(mydata)
+#browser()
 #deces hosp par dept
-deces_hosp_par_dep = mydata[, list(deces = sum(incid_dc), hospitalisations = sum(incid_hosp)), by = "dep"]
-
-
+# deces_hosp_par_dep <- epitutorials::dtbaseAllHosp[, list(deces = sum(incid_dc), 
+#                                    hospitalisations = sum(incid_hosp)), by = "dep"]
+#saveRDS(deces_hosp_par_dep, "data/deces_hosp_par_dep.rds")
+deces_hosp_par_dep = readRDS("data/deces_hosp_par_dep.rds")
 #fr_map = geodata::gadm("FRA", path = here("inst", "tutorials", "1-data-visualization", "data"), level=2)
 #setwd(here("inst", "tutorials", "1-data-visualization"))
 fr_map = geodata::gadm("FRA", path = "data", level=2)
