@@ -26,5 +26,6 @@ Imports:
     here,
     knitr,
     learnr,
+    patchwork,
     sf,
     tutorial.helpers
