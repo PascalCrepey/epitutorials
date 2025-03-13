@@ -1079,6 +1079,11 @@ labels <- c("Cold spot",
 Nous effectuons le calcul de la statistique **Getis Ord**:
 
 ```{r covid_sf_gi, message=F,warning=F, exercise = T, exercise.setup = "covid_lw"}
+breaks <- c(-Inf, -1.96, 1.96, Inf)
+labels <- c("Cold spot",
+            "Not significant",
+            "Hot spot")
+
 covid_lg <- localG(covid_sf_subset$nb_cas, covid.lw)
 
 covid_sf_gi<-covid_sf_subset %>% 
